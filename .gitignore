@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+release/
+release-borderless/
+dist-desktop/
+release-bin/
+*.spec
+backend/dist/
+backend/build/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Temporary and local data files
+*.tmp
+*.log
+*.note
+*.local.json
+*.local.csv
+*.lnk
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.drop
+!desktop/Template/Template English.drop
+.DS_Store
+Thumbs.db
+
+# IDE configuration
+.vscode/
+.idea/
+.workbuddy-ai/
+
+# Notes database (tracked and backed up independently in Date-of-my-note repo)
+backend/data/
+Files/
+
+# Local mobile inbox content
+mobile_sync_sandbox/inbox_data/
+
+# Local vendor packages
+backend/.vendor/

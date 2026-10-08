@@ -1,0 +1,103 @@
+import os
+import sys
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
+from backend.services.asset_recovery import recover_legacy_upload
+from backend.services.data_paths import DATA_DIR, get_assets_dir, get_screenshots_dir
+from backend.routes.migration import router as migration_router
+from backend.routes.settings import router as settings_router
+from backend.routes.workspaces import router as workspaces_router
+from backend.routes.preferences import router as preferences_router
+from backend.services.localization import set_request_language, reset_request_language, translate_payload
+from fastapi.responses import JSONResponse
+
+# Ensure root directory is in sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from backend.routes.cards import router as cards_router
+    from backend.routes.parser import router as parser_router
+    from backend.routes.assets import router as assets_router
+except ImportError:
+    from routes.cards import router as cards_router
+    from routes.parser import router as parser_router
+    from routes.assets import router as assets_router
+
+app = FastAPI(title="Infinite Canvas Note Backend")
+
+
+@app.middleware('http')
+async def localize_request(request, call_next):
+    token = set_request_language(request.headers.get('accept-language', 'en'))
+    try:
+        response = await call_next(request)
+        # Only JSON API messages are localized; file archives and user content
+        # pass through the existing storage and parsing paths unchanged.
+        if request.url.path.startswith('/api/') and 'application/json' in response.headers.get('content-type', ''):
+            import json
+            body = b''.join([chunk async for chunk in response.body_iterator])
+            headers = dict(response.headers)
+            headers.pop('content-length', None)
+            return JSONResponse(translate_payload(json.loads(body)), status_code=response.status_code,
+                                headers=headers, background=response.background)
+        return response
+    finally:
+        reset_request_language(token)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8000", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class DynamicStaticFiles(StaticFiles):
+    def __init__(self, dir_getter, recover_legacy_assets=False, **kwargs):
+        self.dir_getter = dir_getter
+        self.recover_legacy_assets = recover_legacy_assets
+        initial_dir = str(dir_getter())
+        os.makedirs(initial_dir, exist_ok=True)
+        super().__init__(directory=initial_dir, **kwargs)
+
+    def get_path(self, scope):
+        current_dir = str(self.dir_getter())
+        if self.directory != current_dir:
+            self.directory = current_dir
+            self.all_directories = [current_dir]
+        return super().get_path(scope)
+
+    async def get_response(self, path, scope):
+        if self.recover_legacy_assets:
+            await run_in_threadpool(recover_legacy_upload, path, self.dir_getter())
+        return await super().get_response(path, scope)
+
+
+app.mount("/api/screenshots", DynamicStaticFiles(get_screenshots_dir), name="screenshots")
+app.mount("/api/assets", DynamicStaticFiles(get_assets_dir, recover_legacy_assets=True), name="assets")
+
+app.include_router(cards_router)
+app.include_router(parser_router)
+app.include_router(assets_router)
+app.include_router(migration_router)
+app.include_router(settings_router)
+app.include_router(workspaces_router)
+app.include_router(preferences_router)
+
+try:
+    from backend.services.thumbnail_service import run_batch_pregeneration
+    run_batch_pregeneration()
+except Exception as e:
+    print(f"Warning: Failed to start thumbnail pregeneration: {e}")
+
+@app.get("/api/health")
+async def health():
+    return {"app": "infinite-canvas-note", "ready": True}
+
+from pathlib import Path
+web_dir = Path(os.environ.get("PINBOARD_WEB_DIR", Path(__file__).resolve().parents[1] / "frontend" / "dist"))
+if web_dir.is_dir():
+    app.mount("/", StaticFiles(directory=web_dir, html=True), name="web")

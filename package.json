@@ -1,0 +1,11 @@
+{
+  "name": "drop-it-english",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cmd /c desktop\\run_dev.bat",
+    "build": "npm --prefix frontend run build",
+    "desktop:start": "cmd /c desktop\\run.bat",
+    "desktop:dist": "powershell -ExecutionPolicy Bypass -File build_desktop.ps1"
+  }
+}
