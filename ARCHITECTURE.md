@@ -34,7 +34,7 @@ The English edition uses `%LOCALAPPDATA%/DropItEnglish` for runtime data and app
 | Search/pins | `components/SearchModal.tsx`, `hooks/useCanvasPins.ts` | Search navigation and eight persistent numbered pins |
 | Files | `utils/storage.ts`, `workspaceApi.ts`, `workspaceCache.ts` | Immediate cache, revision-aware object synchronization and `.drop` operations |
 | Drafts | `hooks/useWorkspaceDraft.ts` | Idle/continuous autosave and close checkpoint |
-| Window | `components/DesktopWindowControls.tsx`, `desktop/app.py` | Frameless shell, 40px hover title bar and native controls |
+| Window | `components/DesktopWindowControls.tsx`, `desktop/app.py`, `desktop/window_chrome.py` | Frameless shell, 40px hover title bar, native edge/corner resizing and Windows Snap |
 | Desktop services | `desktop/dev_server.py`, `close_checkpoint.py` | Independent backend/Vite ports and cleanup of owned processes |
 | API | `backend/main.py`, `backend/routes/` | Cards, assets, parsing, settings, workspaces and language preference |
 | Backend locale | `backend/services/localization.py`, `backend/locale/messages.en.json` | Native titles and API message translation at the response boundary |

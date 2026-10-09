@@ -6,7 +6,7 @@ Drop-It English 0.1 uses pywebview and the system Microsoft Edge WebView2 Runtim
 
 `desktop/app.py` starts an adjacent frozen service in a distribution, or runs FastAPI directly from source. Backend readiness is checked before the window loads. Development uses a managed Vite server with an IPv4 localhost proxy; each new board has separate backend/Vite ports and current source. Closing the window only stops owned processes after its draft checkpoint.
 
-The shell is frameless. Hovering the top 40px shows its title bar; drag moves the window and double-click maximizes/restores. Native buttons remain available. F5 reloads the page. Language choice loads before React mounts; it defaults to English and persists in the shared English-edition config.
+The shell is frameless. Hovering the top 40px shows its title bar; drag moves the window and double-click maximizes/restores. `desktop/window_chrome.py` restores the Windows `WS_THICKFRAME` style and implements native four-edge/four-corner hit testing. Title-bar movement is handed to `WM_NCLBUTTONDOWN/HTCAPTION`, so Windows Snap, edge maximization, multi-monitor placement and DPI handling continue to work. The minimum window size is 480×320. Native buttons remain available. F5 reloads the page. Language choice loads before React mounts; it defaults to English and persists in the shared English-edition config.
 
 ## Build
 

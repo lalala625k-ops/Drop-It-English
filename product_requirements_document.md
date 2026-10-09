@@ -70,7 +70,7 @@ English edition runtime data lives under `%LOCALAPPDATA%/DropItEnglish`, indepen
 
 ## Rendering and desktop shell
 
-The frameless desktop window keeps transparent window buttons. Hovering the top 40px shows a draggable title bar; double-click maximizes/restores. It hides on leave and stays visible while dragging or focused. This behavior and canvas gestures are unchanged.
+The frameless desktop window keeps transparent window buttons. Hovering the top 40px shows a draggable title bar; double-click maximizes/restores. Its four edges and four corners retain native Windows resize hit areas, and dragging the title bar to a screen edge invokes Windows Snap for half-screen layouts or maximization. The minimum window size is 480×320. It hides on leave and stays visible while dragging or focused. This behavior and canvas gestures are unchanged.
 
 The parchment canvas, paper cards, dark outlines, origin colors, group outlines, typography, minimap and distant-object rendering retain the existing design. Offscreen objects use spatial culling; dense distant views use simplified rendering. FPS and recognition diagnostic panels remain unmounted.
 
